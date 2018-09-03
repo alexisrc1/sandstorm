@@ -1,3 +1,3 @@
 # sandstorm
 
-Whistle a dong, someone knows it !
+Whistle a song, someone knows it !
