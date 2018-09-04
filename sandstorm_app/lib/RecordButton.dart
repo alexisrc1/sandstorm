@@ -1,6 +1,9 @@
-import 'package:audio_recorder/audio_recorder.dart';
+import 'dart:async';
+
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class RecordButton extends StatefulWidget {
   RecordButton({Key key}) : super(key: key);
@@ -11,35 +14,46 @@ class RecordButton extends StatefulWidget {
 
 class _RecordButtonState extends State<RecordButton> {
   bool _isRecording = false;
+  FlutterSound flutterSound;
+
+  @override
+  void initState() {
+    super.initState();
+    flutterSound = new FlutterSound();
+    flutterSound.setSubscriptionDuration(0.01);
+  }
 
   void _startRecording() async {
-    var permitted = await AudioRecorder.hasPermissions;
+    var permitted =
+        await SimplePermissions.checkPermission(Permission.RecordAudio) &&
+            await SimplePermissions.checkPermission(
+                Permission.WriteExternalStorage);
+
     if (!permitted) {
-      _showError("No permission to access your microphone");
+      _showError("The app is not authorized to record...");
+      await Future.delayed(Duration(seconds: 2));
+      SimplePermissions.openSettings();
       return;
     }
 
+    var now = DateTime.now().toIso8601String();
     try {
-      await AudioRecorder.start(
-          path: "mon_enregistrement", audioOutputFormat: AudioOutputFormat.AAC);
+      var res = await flutterSound.startRecorder(null);
+      _showError(res);
+      setState(() {
+        _isRecording = true;
+      });
     } on Exception catch (e) {
-      _showError(e.toString());
+      _showError("Unable to start recording: $e");
     }
-    setState(() {
-      _isRecording = true;
-    });
   }
 
   void _stopRecording() async {
-    var recording = await AudioRecorder.isRecording;
-    if (recording) {
-      await AudioRecorder.stop();
-      setState(() {
-        _isRecording = false;
-      });
-    } else {
-      _showError("Not currently recording");
-    }
+    var res = await flutterSound.stopRecorder();
+    _showError("$res");
+    setState(() {
+      _isRecording = false;
+    });
   }
 
   @override
