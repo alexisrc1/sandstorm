@@ -1,16 +1,15 @@
-from flask import Flask
-from flask import request, abort, jsonify
-from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
-
-import os.path
+import itertools
 import uuid
 from datetime import datetime
 from pathlib import Path
-import itertools
+
+from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = Path() / 'static' / 'recordings'
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024 # 8Mib
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8Mib
+
 
 @app.route("/")
 def hello():
@@ -24,11 +23,12 @@ def hello():
         </form>
         '''
 
+
 @app.route('/upload', methods=['POST'])
 def upload():
     """Upload a file to the server"""
 
-    if not 'recording' in request.files:
+    if 'recording' not in request.files:
         raise BadRequest('Missing recording file')
     file = request.files['recording']
 
@@ -43,28 +43,29 @@ def upload():
     file.save(path.open('wb'))
 
     return jsonify(
-        filename = filename
+        filename=filename
     )
 
 
 @app.route('/recordings')
 def recordings():
     """Lists the existing recordings"""
-    recordings = app.config['UPLOAD_FOLDER'].iterdir()
-    top_recordings = itertools.islice(recordings, 1000)
+    recordings_iter = app.config['UPLOAD_FOLDER'].iterdir()
+    top_recordings = itertools.islice(recordings_iter, 1000)
     return jsonify(
-        recordings = [
+        recordings=[
             {
-                "name" : recording.name,
+                "name": recording.name,
                 "time": recording.stat().st_mtime_ns
             }
-            for recording in top_recordings        
+            for recording in top_recordings
         ]
     )
+
 
 @app.errorhandler(HTTPException)
 def exception_handler(error):
     return jsonify(
-        error = error.description,
-        code = error.code
+        error=error.description,
+        code=error.code
     ), error.code
