@@ -74,3 +74,6 @@ def exception_handler(error):
         error=error.description,
         code=error.code
     ), error.code
+
+
+app.run(host='0.0.0.0')
