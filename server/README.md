@@ -6,5 +6,5 @@ The entry point is [`app.py`](app.py).
 ### How to run in development
 
 ```bash
-FLASK_ENV=development pipenv run flask run
+FLASK_ENV=development pipenv run python app.py
 ```
