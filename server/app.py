@@ -39,7 +39,12 @@ def upload():
         raise UnsupportedMediaType('The recording is not an m4a file')
 
     filename = f"{datetime.now().isoformat()}-{uuid.uuid4()}.m4a"
-    path = app.config['UPLOAD_FOLDER'] / filename
+    parent_directory = app.config['UPLOAD_FOLDER']
+
+    if not parent_directory.exists():
+        parent_directory.mkdir()
+
+    path = parent_directory / filename
     file.save(path.open('wb'))
 
     return jsonify(
