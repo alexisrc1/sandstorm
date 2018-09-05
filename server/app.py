@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request, abort, jsonify
+from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
 import os.path
 import uuid
@@ -9,6 +10,7 @@ import itertools
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = Path() / 'static' / 'recordings'
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024 # 8Mib
 
 @app.route("/")
 def hello():
@@ -25,15 +27,23 @@ def hello():
 @app.route('/upload', methods=['POST'])
 def upload():
     """Upload a file to the server"""
+
+    if not 'recording' in request.files:
+        raise BadRequest('Missing recording file')
     file = request.files['recording']
+
     if not file or file.filename == '':
-        abort(505)
-        return redirect(request.url)
+        raise BadRequest('Missing recording filename')
+
+    if not file.filename.endswith('m4a') or file.mimetype != 'audio/mp4':
+        raise UnsupportedMediaType('The recording is not an m4a file')
+
     filename = f"{datetime.now().isoformat()}-{uuid.uuid4()}.m4a"
     path = app.config['UPLOAD_FOLDER'] / filename
     file.save(path.open('wb'))
+
     return jsonify(
-        filename = filename    
+        filename = filename
     )
 
 
@@ -51,3 +61,10 @@ def recordings():
             for recording in top_recordings        
         ]
     )
+
+@app.errorhandler(HTTPException)
+def exception_handler(error):
+    return jsonify(
+        error = error.description,
+        code = error.code
+    ), error.code
