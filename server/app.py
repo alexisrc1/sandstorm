@@ -1,9 +1,10 @@
 import itertools
+import json
 import uuid
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
 app = Flask(__name__)
@@ -53,19 +54,21 @@ def upload():
     )
 
 
+def recording_json(recording):
+    return json.dumps({
+        "name": recording.name,
+        "time": recording.stat().st_mtime_ns
+    }) + "\n"
+
+
 @app.route('/recordings')
 def recordings():
     """Lists the existing recordings"""
     recordings_iter = app.config['UPLOAD_FOLDER'].iterdir()
     top_recordings = itertools.islice(recordings_iter, 1000)
-    return jsonify(
-        recordings=[
-            {
-                "name": recording.name,
-                "time": recording.stat().st_mtime_ns
-            }
-            for recording in top_recordings
-        ]
+    return Response(
+        map(recording_json, top_recordings),
+        mimetype='text/json'
     )
 
 

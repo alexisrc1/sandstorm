@@ -47,7 +47,6 @@ class _RecordButtonState extends State<RecordButton> {
 
     try {
       var filepath = await flutterSound.startRecorder(null);
-      _showError(filepath);
       setState(() {
         _filePath = filepath;
         _isRecording = true;

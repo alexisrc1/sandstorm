@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sandstorm_app/Recording.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class RecordingWidget extends StatelessWidget {
   final Recording _recording;
@@ -22,7 +23,7 @@ class RecordingWidget extends StatelessWidget {
         ),
         new Expanded(
           child: Text(
-            this._recording.name,
+            timeago.format(_recording.date),
             style: TextStyle(fontSize: HEIGHT / 2),
           ),
         )
