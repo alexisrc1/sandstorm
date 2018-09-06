@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandstorm_app/RecordButton.dart';
+import 'package:sandstorm_app/RecordingsList.dart';
 
 void main() => runApp(new MyApp());
 
@@ -53,7 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: new Center(
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[new RecordButton()],
+          children: <Widget>[
+            RecordButton(),
+            RecordingsList()
+          ],
         ),
       ),
     );
