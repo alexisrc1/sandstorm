@@ -19,6 +19,7 @@ class RecordButton extends StatefulWidget {
 }
 
 class _RecordButtonState extends State<RecordButton> {
+  static const SIZE = 150.0;
   bool _isRecording = false;
   String _filePath;
   FlutterSound flutterSound;
@@ -109,11 +110,12 @@ class _RecordButtonState extends State<RecordButton> {
   Widget build(BuildContext context) {
     return new GestureDetector(
       child: new Container(
-        width: 200.0,
-        height: 200.0,
+        margin: EdgeInsets.all(SIZE/10),
+        width: SIZE,
+        height: SIZE,
         child: new Icon(
           _isRecording ? Icons.stop : Icons.play_arrow,
-          size: 50.0,
+          size: SIZE / 4,
         ),
         decoration: new BoxDecoration(
             color: _isRecording ? Colors.red : Colors.green,

@@ -27,6 +27,7 @@ class _RecordingsListState extends State<RecordingsList> {
     return Expanded(
         child: ListView.builder(
       padding: new EdgeInsets.all(8.0),
+      itemExtent: RecordingWidget.HEIGHT,
       itemCount: _recordings.length,
       itemBuilder: (BuildContext context, int index) {
         return new RecordingWidget(_recordings[index]);
