@@ -45,7 +45,8 @@ def upload():
         parent_directory.mkdir()
 
     path = parent_directory / filename
-    file.save(path.open('wb'))
+    with path.open('wb') as destination_file:
+        file.save(destination_file)
 
     return jsonify(
         filename=filename
