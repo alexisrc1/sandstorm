@@ -4,8 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:sandstorm_app/Recording.dart';
 import 'package:sandstorm_app/RecordingWidget.dart';
 
-const UPLOAD_ENDPOINT = "http://192.168.42.43:5000/upload";
-
 class RecordingsList extends StatefulWidget {
   RecordingsList({Key key}) : super(key: key);
 

@@ -1,15 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:sandstorm_app/Server.dart';
 import 'package:simple_permissions/simple_permissions.dart';
-
-const UPLOAD_ENDPOINT = "http://192.168.42.43:5000/upload";
 
 class RecordButton extends StatefulWidget {
   RecordButton({Key key}) : super(key: key);
@@ -76,41 +72,18 @@ class _RecordButtonState extends State<RecordButton> {
 
     try {
       _showSuccess("Sending the recording...");
-      await _uploadFile(recordingFile);
+      await Server.uploadFile(recordingFile);
       _showSuccess("The recording was sent.");
     } catch (e) {
       _showError("Unable to send the recording: $e");
     }
   }
 
-  _uploadFile(File file) async {
-    var bytesStream = file.openRead();
-    var fileSize = file.statSync().size;
-
-    var request = new MultipartRequest("POST", Uri.parse(UPLOAD_ENDPOINT));
-    var mediaType = new MediaType("audio", "mp4");
-    var multipartFile = MultipartFile("recording", bytesStream, fileSize,
-        filename: "recording.m4a", contentType: mediaType);
-    request.files.add(multipartFile);
-
-    var response = await request.send();
-
-    if (response.statusCode != 200)
-      throw "Server error: ${response.reasonPhrase}";
-
-    var responseObject = await response.stream
-        .transform(utf8.decoder)
-        .transform(json.decoder)
-        .first;
-
-    return responseObject;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       child: new Container(
-        margin: EdgeInsets.all(SIZE/10),
+        margin: EdgeInsets.all(SIZE / 10),
         width: SIZE,
         height: SIZE,
         child: new Icon(
