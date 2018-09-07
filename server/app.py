@@ -8,8 +8,11 @@ from flask import Flask, request, jsonify, Response
 from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = Path() / 'static' / 'recordings'
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8Mib
+
+UPLOAD_FOLDER = Path() / 'static' / 'recordings'
+if not UPLOAD_FOLDER.exists():
+    UPLOAD_FOLDER.mkdir(parents=True)
 
 
 @app.route("/")
@@ -40,12 +43,7 @@ def upload():
         raise UnsupportedMediaType('The recording is not an m4a file')
 
     filename = f"{datetime.now().isoformat()}-{uuid.uuid4()}.m4a"
-    parent_directory = app.config['UPLOAD_FOLDER']
-
-    if not parent_directory.exists():
-        parent_directory.mkdir()
-
-    path = parent_directory / filename
+    path = UPLOAD_FOLDER / filename
     with path.open('wb') as destination_file:
         file.save(destination_file)
 
@@ -64,7 +62,7 @@ def recording_json(recording):
 @app.route('/recordings')
 def recordings():
     """Lists the existing recordings"""
-    recordings_iter = app.config['UPLOAD_FOLDER'].iterdir()
+    recordings_iter = UPLOAD_FOLDER.iterdir()
     top_recordings = itertools.islice(recordings_iter, 1000)
     return Response(
         map(recording_json, top_recordings),
