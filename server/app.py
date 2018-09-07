@@ -1,14 +1,20 @@
 import itertools
 import json
-import uuid
-from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, request, jsonify, Response
 from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
+from database import db, Recording
+
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8Mib
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 UPLOAD_FOLDER = Path() / 'static' / 'recordings'
 if not UPLOAD_FOLDER.exists():
@@ -42,14 +48,12 @@ def upload():
     if not file.filename.endswith('m4a') or file.mimetype != 'audio/mp4':
         raise UnsupportedMediaType('The recording is not an m4a file')
 
-    filename = f"{datetime.now().isoformat()}-{uuid.uuid4()}.m4a"
-    path = UPLOAD_FOLDER / filename
+    recording = Recording.create()
+    path = UPLOAD_FOLDER / recording.name
     with path.open('wb') as destination_file:
         file.save(destination_file)
 
-    return jsonify(
-        filename=filename
-    )
+    return jsonify(recording.toDict())
 
 
 def recording_json(recording):

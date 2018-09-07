@@ -3,3 +3,4 @@ static/recordings/*
 .idea/
 venv/
 server.iml
+database.db
