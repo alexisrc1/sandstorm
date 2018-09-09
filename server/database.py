@@ -14,11 +14,14 @@ class Recording(db.Model):
         return f'<Recording {self.name}>'
 
     def toDict(self):
-        return {"name": self.name, "timestamp": self.timestamp}
+        return {
+            "name": self.name,
+            "timestamp": self.timestamp
+        }
 
     @staticmethod
     def create():
         """Create a new recording with the current timestamp and a random name"""
         now = datetime.now()
         filename = f"{now.isoformat()}-{uuid.uuid4()}.m4a"
-        return Recording(name=filename, timestamp=now)
+        return Recording(name=filename, timestamp=int(now.timestamp()))

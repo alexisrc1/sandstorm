@@ -53,6 +53,8 @@ def upload():
     with path.open('wb') as destination_file:
         file.save(destination_file)
 
+    db.session.add(recording)
+    db.session.commit()
     return jsonify(recording.toDict())
 
 
