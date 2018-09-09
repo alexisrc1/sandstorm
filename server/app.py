@@ -55,25 +55,17 @@ def upload():
 
     db.session.add(recording)
     db.session.commit()
-    return jsonify(recording.toDict())
-
-
-def recording_json(recording):
-    return json.dumps({
-        "name": recording.name,
-        "time": recording.stat().st_mtime_ns
-    }) + "\n"
+    return jsonify(recording.to_dict())
 
 
 @app.route('/recordings')
 def recordings():
     """Lists the existing recordings"""
-    recordings_iter = UPLOAD_FOLDER.iterdir()
-    top_recordings = itertools.islice(recordings_iter, 1000)
+    top_recordings = Recording.query.order_by(Recording.timestamp.desc()).limit(1000).all()
+    recordings_iter = (json.dumps(r.to_dict()) + '\n' for r in top_recordings)
     return Response(
-        map(recording_json, top_recordings),
-        mimetype='text/json'
-    )
+        recordings_iter,
+        mimetype='text/plain')
 
 
 @app.errorhandler(HTTPException)
