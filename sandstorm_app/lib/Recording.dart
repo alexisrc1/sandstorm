@@ -7,11 +7,8 @@ class Recording {
   int timestamp;
 
   Recording({this.name, this.timestamp});
-
-  Uri get uri => Server.getRecordingUri(this);
-
-  DateTime get date =>
-      new DateTime.fromMillisecondsSinceEpoch(timestamp);
+  
+  DateTime get date => new DateTime.fromMillisecondsSinceEpoch(timestamp);
 
   factory Recording.fromJson(Map<String, dynamic> json) {
     return Recording(name: json['name'], timestamp: json['timestamp']);

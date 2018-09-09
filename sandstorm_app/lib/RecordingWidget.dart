@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sandstorm_app/Recording.dart';
+import 'package:sandstorm_app/Server.dart';
+import 'package:sandstorm_app/Sound.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class RecordingWidget extends StatelessWidget {
@@ -15,11 +17,16 @@ class RecordingWidget extends StatelessWidget {
       key: Key(this._recording.name),
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Icon(
-          Icons.play_circle_outline,
-          color: Colors.blue,
-          semanticLabel: "play the recording",
-          size: HEIGHT,
+        IconButton(
+          iconSize: HEIGHT,
+          alignment: Alignment.center,
+          icon: Icon(
+            Icons.play_circle_outline,
+            color: Colors.blue,
+            semanticLabel: "play the recording",
+            size: HEIGHT,
+          ),
+          onPressed: () => Player.play(Server.getRecordingUri(_recording.name)),
         ),
         new Expanded(
           child: Text(

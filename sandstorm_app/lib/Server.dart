@@ -53,6 +53,6 @@ class Server {
         .map((obj) => Recording.fromJson(obj));
   }
 
-  static Uri getRecordingUri(Recording recording) =>
-      _staticRecordingsUri.resolve(recording.name);
+  static Uri getRecordingUri(String recordingName) =>
+      _staticRecordingsUri.resolve(Uri.encodeComponent(recordingName));
 }
