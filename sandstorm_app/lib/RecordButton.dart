@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sandstorm_app/Server.dart';
+import 'package:sandstorm_app/Sound.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 class RecordButton extends StatefulWidget {
@@ -17,14 +16,11 @@ class RecordButton extends StatefulWidget {
 class _RecordButtonState extends State<RecordButton> {
   static const SIZE = 150.0;
   bool _isRecording = false;
-  String _filePath;
-  FlutterSound flutterSound;
+  CurrentMicrophoneRecording _currentRecording;
 
   @override
   void initState() {
     super.initState();
-    flutterSound = new FlutterSound();
-    flutterSound.setSubscriptionDuration(0.01);
   }
 
   void _startRecording() async {
@@ -46,9 +42,9 @@ class _RecordButtonState extends State<RecordButton> {
     }
 
     try {
-      var filepath = await flutterSound.startRecorder(null);
+      var recording = await CurrentMicrophoneRecording.start();
       setState(() {
-        _filePath = filepath;
+        _currentRecording = recording;
         _isRecording = true;
       });
     } on Exception catch (e) {
@@ -64,14 +60,12 @@ class _RecordButtonState extends State<RecordButton> {
   }
 
   void _stopRecording() async {
-    await flutterSound.stopRecorder();
+    _currentRecording.stop();
     _setRecordingState(false);
-
-    var recordingFile = new File(_filePath);
 
     try {
       _showSuccess("Sending the recording...");
-      await Server.uploadFile(recordingFile);
+      await Server.uploadFile(_currentRecording.file);
       _showSuccess("The recording was sent.");
     } catch (e) {
       _showError("Unable to send the recording: $e");
