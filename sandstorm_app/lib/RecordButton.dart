@@ -16,6 +16,7 @@ class RecordButton extends StatefulWidget {
 class _RecordButtonState extends State<RecordButton> {
   static const SIZE = 150.0;
   bool _isRecording = false;
+  bool _isWaiting = false;
   CurrentMicrophoneRecording _currentRecording;
 
   @override
@@ -23,8 +24,8 @@ class _RecordButtonState extends State<RecordButton> {
     super.initState();
   }
 
-  void _startRecording() async {
-    if (_isRecording) {
+  Future<void> _startRecording() async {
+    if (_isRecording || _isWaiting) {
       // Avoid starting a new recording when one is started already
       return;
     }
@@ -59,7 +60,22 @@ class _RecordButtonState extends State<RecordButton> {
     });
   }
 
-  void _stopRecording() async {
+  T _waitFor<T>(Future<T> f) {
+    setState(() {
+      _isWaiting = true;
+    });
+    f.whenComplete(() {
+      setState(() {
+        _isWaiting = false;
+      });
+    });
+  }
+
+  Future<void> _stopRecording() async {
+    if (_currentRecording == null || _isWaiting) {
+      print("Cannot stop recording");
+      return;
+    }
     _currentRecording.stop();
     _setRecordingState(false);
 
@@ -80,17 +96,24 @@ class _RecordButtonState extends State<RecordButton> {
         width: SIZE,
         height: SIZE,
         child: new Icon(
-          _isRecording ? Icons.stop : Icons.play_arrow,
+          getCurrentIcon(),
           size: SIZE / 4,
         ),
         decoration: new BoxDecoration(
-            color: _isRecording ? Colors.red : Colors.green,
+            color: getCurrentColor(),
             borderRadius: new BorderRadius.circular(200.0)),
       ),
-      onTapDown: (e) => _startRecording(),
-      onTapUp: (e) => _stopRecording(),
+      onTapDown: (e) => _waitFor(_startRecording()),
+      onTapUp: (e) => _waitFor(_stopRecording()),
     );
   }
+
+  Color getCurrentColor() =>
+      _isRecording ? Colors.red : _isWaiting ? Colors.purple : Colors.green;
+
+  IconData getCurrentIcon() => _isRecording
+      ? Icons.stop
+      : _isWaiting ? Icons.watch_later : Icons.play_arrow;
 
   void _showError(String message) {
     _showMessage(message, Colors.red);
