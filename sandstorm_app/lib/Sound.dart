@@ -29,11 +29,23 @@ class CurrentMicrophoneRecording {
   }
 }
 
-class Player {
-  static play(Uri soundUri) async {
-    var res = flutterSound.stopPlayer();
-    print(res);
-    var res2 = await flutterSound.startPlayer(soundUri.toString());
-    print(res2);
+class CurrentlyPlaying {
+  static CurrentlyPlaying _current;
+
+  CurrentlyPlaying() {
+    this.statusStream = flutterSound.onPlayerStateChanged;
+  }
+
+  Stream<PlayStatus> statusStream;
+
+  Future<void> stop() async {
+    print(await flutterSound.stopPlayer());
+    _current = null;
+  }
+
+  static Future<CurrentlyPlaying> play(Uri soundUri) async {
+    if (_current != null) _current.stop();
+    print(await flutterSound.startPlayer(soundUri.toString()));
+    return new CurrentlyPlaying();
   }
 }
