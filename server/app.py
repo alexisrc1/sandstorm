@@ -5,7 +5,7 @@ from pathlib import Path
 from flask import Flask, request, jsonify, Response
 from werkzeug.exceptions import HTTPException, BadRequest, UnsupportedMediaType
 
-from database import db, Recording
+from database import db, Recording, Commenting
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8Mib
@@ -27,8 +27,8 @@ def hello():
         <!doctype html>
         <title>Upload new File</title>
         <h1>Upload new File</h1>
-        <form method=post enctype=multipart/form-data action=upload>
-          <input type=file name=recording>
+        <form method=post enctype=multipart/form-data action=upload_comments>
+          <input type=file name=comment>
           <input type=submit value=Upload>
         </form>
         '''
@@ -75,5 +75,34 @@ def exception_handler(error):
         code=error.code
     ), error.code
 
+#### comments
 
-app.run(host='0.0.0.0')
+
+@app.route('/upload_comments', methods=['POST'])
+def upload_comments():
+    """Upload a comment to the server"""
+
+    if 'comment' not in request.files:
+        raise BadRequest('Missing comment file')
+    file = request.files['comment']
+
+    if not file or file.filename == '':
+        raise BadRequest('Missing comment filename')
+
+    if not file.filename.endswith('txt'):
+        raise UnsupportedMediaType('The comment is not a txt file')
+
+    commenting = Commenting.create()
+    path = UPLOAD_FOLDER / commenting.name
+    with path.open('wb') as destination_file:
+        file.save(destination_file)
+
+
+
+    db.session.add(commenting)
+    db.session.commit()
+    return jsonify(commenting.to_dict())
+
+
+
+app.run(host='127.0.0.1',debug=True, use_evalex=False)
