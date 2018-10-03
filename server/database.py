@@ -50,7 +50,7 @@ class Commenting(db.Model):
         }
 
     @staticmethod
-    def create_comment():
+    def create():
         """Create a new comment with the current timestamp and a random name"""
         now = datetime.now()
         filename = f"{now.isoformat()}-{uuid.uuid4()}.txt"

@@ -27,8 +27,8 @@ def hello():
         <!doctype html>
         <title>Upload new File</title>
         <h1>Upload new File</h1>
-        <form method=post enctype=multipart/form-data action=upload_comments>
-          <input type=file name=comment>
+        <form method=post enctype=multipart/form-data action="upload_comments">
+          <input type=text name=comment>
           <input type=submit value=Upload>
         </form>
         '''
@@ -82,9 +82,9 @@ def exception_handler(error):
 def upload_comments():
     """Upload a comment to the server"""
 
-    if 'comment' not in request.files:
-        raise BadRequest('Missing comment file')
-    file = request.files['comment']
+    if 'comment' not in request.form:
+        raise BadRequest('Missing comment')
+    file = request.form['comment']
 
     if not file or file.filename == '':
         raise BadRequest('Missing comment filename')
