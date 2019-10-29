@@ -15,7 +15,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_sound: ^1.1.1
+  flutter_sound: ^1.4.5
   simple_permissions: ^0.1.6
   http: ^0.11.3+17
   timeago: ^2.0.7
